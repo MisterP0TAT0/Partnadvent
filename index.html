@@ -158,7 +158,7 @@ const KEY = 'advent-' + C.year;
 const ICON = {photo:'📷',video:'🎬',music:'🎵',note:'💌',voucher:'☕',poem:'📜',message:'💬',gift:'🎁'};
 const MONTH = new Date(C.year, 11, 1).toLocaleString('en-GB',{month:'short'});
 const SZ = 'ssw' + 'tsssws' + 'bssss' + 'wtssss' + 'ssbw' + 'f'; // s=1x1 w=2x1 t=1x2 b=2x2 f=full row
-let opened = {}, testDate = q.get('today') || '', intro = true, fresh = 0;
+let opened = {}, testDate = q.get('today') || '', intro = true, fresh = 0, peek = {}, pend = false;
 
 const today = () => { const t = testDate; const d = t ? new Date(t + 'T12:00:00') : new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
 const doorDate = n => new Date(C.year, 11, n);
@@ -189,11 +189,11 @@ function render() {
 
   $('#grid').className = 'grid' + (intro ? ' intro' : ''); intro = false;
   $('#grid').innerHTML = days.map(n => {
-    const x = D[n] || {t:'note',title:'',text:''}, isOpen = !!opened[n], ready = doorDate(n) <= t;
+    const x = D[n] || {t:'note',title:'',text:''}, isOpen = !!opened[n] || (giver && !!peek[n]), ready = doorDate(n) <= t;
     const w = ' ' + SZ[n - 1];
     if (isOpen) {
       const im = thumb(x);
-      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${x.title}<small>${giver ? 'Opened ' + fmt(opened[n]) : ''}</small></span><i class="knob"></i></button>`;
+      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${x.title}<small>${giver ? (opened[n] ? 'Opened ' + fmt(opened[n]) : 'Preview only') : ''}</small></span><i class="knob"></i></button>`;
     }
     return `<button class="door c${n % 5}${w}${ready ? ' ready' : ''}" data-n="${n}" style="--i:${n}" aria-label="Day ${n}, ${ready ? 'ready to open' : 'locked'}"><span class="num">${n}</span><span class="bow"><b></b></span><i class="knob"></i></button>`;
   }).join('');
@@ -218,7 +218,15 @@ function show(n) {
   $('#card').innerHTML = `<button class="x" aria-label="Close">×</button><div class="d">${n} ${MONTH}</div><h2>${x.title}</h2>${body(x)}`;
   $('#ov').classList.add('on'); $('#card .x').focus();
 }
-function close() { $('#ov').classList.remove('on'); $('#card').innerHTML = ''; }
+function close() {
+  $('#ov').classList.remove('on'); $('#card').innerHTML = '';
+  if (pend) { pend = false; render(); setTimeout(() => fresh = 0, 900); }
+}
+function nope(n) {
+  const days = Math.round((doorDate(n) - today()) / 864e5), d = doorDate(n).toLocaleDateString('en-GB', {weekday: 'long', day: 'numeric', month: 'long'});
+  $('#card').innerHTML = `<button class="x" aria-label="Close">×</button><h2>Not yet!</h2><p>This door opens on ${d}. That's ${days === 1 ? 'tomorrow' : days + ' days away'}.</p>`;
+  $('#ov').classList.add('on'); $('#card .x').focus();
+}
 function toast(m) { const e = $('#toast'); e.textContent = m; e.classList.add('on'); setTimeout(() => e.classList.remove('on'), 2200); }
 
 $('#grid').addEventListener('click', async e => {
@@ -226,11 +234,12 @@ $('#grid').addEventListener('click', async e => {
   const n = +b.dataset.n;
   if (b.classList.contains('swing')) return;
   if (b.classList.contains('open')) return show(n);
-  if (doorDate(n) > today()) { b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 400); return toast(`Not yet. This door opens on ${n} ${MONTH}.`); }
+  if (doorDate(n) > today()) { b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 400); return nope(n); }
   burst(b); b.classList.add('swing');
   await new Promise(r => setTimeout(r, 550));
   show(n);
-  if (!giver) { fresh = n; await save(n); render(); setTimeout(() => fresh = 0, 900); } else render();
+  fresh = n; pend = true;
+  if (!giver) await save(n); else peek[n] = 1;
 });
 $('#ov').addEventListener('click', e => { if (e.target.id === 'ov' || e.target.classList.contains('x')) close(); });
 addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
@@ -248,9 +257,10 @@ function burst(el) {
 function tools() {
   if (!giver && !q.has('test')) return;
   const iso = d => d.toISOString().slice(0, 10);
-  $('#banner').innerHTML = `<div class="banner">${giver ? 'Giver view: opening a door here will not count as opened.' : 'Test mode: doors you open are saved.'}<br>Pretend today is <input type="date" id="td" value="${testDate || iso(new Date())}"> <button id="tr">Use real date</button>${giver ? '' : ' <button id="rs">Reset opened doors</button>'}</div>`;
-  $('#td').onchange = e => { testDate = e.target.value; render(); };
-  $('#tr').onclick = () => { testDate = ''; $('#td').value = iso(new Date()); render(); };
+  $('#banner').innerHTML = `<div class="banner">${giver ? 'Giver view: doors you open here are a preview for this session only and are not saved.' : 'Test mode: doors you open are saved.'}<br>Pretend today is <input type="date" id="td" value="${testDate || iso(new Date())}"> <button id="tr">Use real date</button>${giver ? ' <button id="cp">Clear previews</button>' : ' <button id="rs">Reset opened doors</button>'}</div>`;
+  $('#td').onchange = e => { testDate = e.target.value; intro = true; render(); };
+  $('#tr').onclick = () => { testDate = ''; $('#td').value = iso(new Date()); intro = true; render(); };
+  const cp = $('#cp'); if (cp) cp.onclick = () => { peek = {}; intro = true; render(); };
   const rs = $('#rs');
   if (rs) rs.onclick = async () => {
     if (!confirm('Reset all opened doors' + (C.db ? ' for both of you' : '') + '?')) return;
