@@ -60,13 +60,13 @@ main{max-width:520px;margin:0 auto}
 #ov.on{display:flex}
 .card{background:#fbf6ea;border-radius:26px;max-width:480px;width:100%;max-height:90vh;overflow:auto;padding:26px 22px 24px;position:relative;animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
 @keyframes pop{from{transform:scale(.7);opacity:0}}
-.card h2{font:italic 600 1.6rem/1.2 var(--serif);color:var(--red);margin:2px 28px 14px 0}
+.card h2{font:italic 600 1.6rem/1.2 var(--serif);color:var(--red);margin:2px 44px 14px 0}
 .card .d{font-size:.85rem;opacity:.7}
 .card img,.card video{width:100%;border-radius:14px;margin-bottom:12px;display:block}
 .card audio{width:100%;margin:6px 0 12px}
 .card p{line-height:1.65;margin-bottom:10px;white-space:pre-wrap}
 .card .poem{font-style:italic;font-size:1.1rem;text-align:center;line-height:1.9}
-.x{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.8rem;color:var(--red);cursor:pointer}
+.x{position:absolute;top:10px;right:10px;z-index:5;width:44px;height:44px;border:0;border-radius:50%;background:#efe3cc;color:var(--red);font:400 1.8rem/1 var(--body);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}.x:hover{background:#e6d5b4}
 .btn{display:inline-block;background:#1db954;color:#fff;text-decoration:none;padding:9px 16px;border-radius:99px;font-weight:600;margin:4px 0 12px}
 .ticket{border:2px dashed var(--rb);border-radius:16px;text-align:center;padding:22px 12px;margin-bottom:12px;background:#fff}
 .ticket .big{font:800 1.5rem var(--serif);color:var(--red)}
@@ -88,7 +88,6 @@ main{max-width:520px;margin:0 auto}
 @keyframes pt{to{transform:translate(var(--dx),calc(var(--dy) + 60px)) rotate(240deg) scale(.4);opacity:0}}
 .banner input,.banner button{font:inherit;padding:3px 8px;border-radius:8px;border:1px solid #d8b86a;background:#fff;margin:2px}
 .door.ready{box-shadow:0 0 0 3px var(--gold),0 0 14px 4px rgba(255,196,70,.8)}
-@media (prefers-reduced-motion:reduce){.snow{display:none}.lights i{animation:none}}
 </style>
 </head>
 <body>
@@ -183,10 +182,12 @@ function render() {
   const dayNo = Math.min(Math.max(Math.round((t - doorDate(1)) / 864e5) + 1, 0), C.total);
   const status = dayNo === 0 ? `The first door opens on 1 ${MONTH}`
     : `Day ${dayNo} of ${C.total} · ` + (waiting ? `${waiting} door${waiting > 1 ? 's are' : ' is'} waiting` : 'all caught up');
+  if ($('#hero .s')) $('#hero .s').textContent = status; else {
   $('#hero').innerHTML = `<div class="lights"></div><p class="k">An advent calendar</p><h1>For ${C.name}</h1><p class="f">with love from ${C.from}</p><p class="s">${status}</p>`;
   const L = $('.lights'); ['#ffd23f','#ff5b5b','#59d36b','#4aa8ff','#ff9f43'].forEach(()=>{}); 
   for (let i = 0; i < 14; i++) { const b = document.createElement('i'); b.style.background = ['#ffd23f','#ff5b5b','#59d36b','#4aa8ff','#ff9f43'][i % 5]; b.style.animationDelay = (i * .3) + 's'; L.append(b); }
   for (let i = 0; i < 18; i++) { const s = document.createElement('span'); s.className = 'snow'; s.textContent = '❄'; s.style.cssText = `left:${Math.random()*100}%;font-size:${8+Math.random()*10}px;animation-duration:${6+Math.random()*8}s;animation-delay:-${Math.random()*10}s`; $('#hero').append(s); }
+  }
 
   $('#grid').className = 'grid' + (intro ? ' intro' : ''); intro = false;
   $('#grid').innerHTML = days.map(n => {
