@@ -87,7 +87,8 @@ main{max-width:520px;margin:0 auto}
 .pt{position:fixed;z-index:15;pointer-events:none;font-size:16px;animation:pt 1s ease-out forwards}
 @keyframes pt{to{transform:translate(var(--dx),calc(var(--dy) + 60px)) rotate(240deg) scale(.4);opacity:0}}
 .banner input,.banner button{font:inherit;padding:3px 8px;border-radius:8px;border:1px solid #d8b86a;background:#fff;margin:2px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+.door.ready{box-shadow:0 0 0 3px var(--gold),0 0 14px 4px rgba(255,196,70,.8)}
+@media (prefers-reduced-motion:reduce){.snow{display:none}.lights i{animation:none}}
 </style>
 </head>
 <body>
@@ -193,7 +194,7 @@ function render() {
     const w = ' ' + SZ[n - 1];
     if (isOpen) {
       const im = thumb(x);
-      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${x.title}<small>${giver ? (opened[n] ? 'Opened ' + fmt(opened[n]) : 'Preview only') : ''}</small></span><i class="knob"></i></button>`;
+      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${x.title}<small>${giver ? (opened[n] ? 'Opened ' + fmt(opened[n]) : 'Preview only') : ''}</small></span></button>`;
     }
     return `<button class="door c${n % 5}${w}${ready ? ' ready' : ''}" data-n="${n}" style="--i:${n}" aria-label="Day ${n}, ${ready ? 'ready to open' : 'locked'}"><span class="num">${n}</span><span class="bow"><b></b></span><i class="knob"></i></button>`;
   }).join('');
