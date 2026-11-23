@@ -23,10 +23,10 @@ main{max-width:520px;margin:0 auto}
 @keyframes fall{to{transform:translateY(300px) rotate(180deg)}}
 .banner{margin:12px 0 0;text-align:center;font-size:.85rem;background:#fff3cf;border-radius:12px;padding:8px}
 .panel{margin-top:16px;background:#ece2cb;border-radius:28px;padding:12px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.door{position:relative;aspect-ratio:1;border:0;border-radius:18px;cursor:pointer;overflow:hidden;color:#fff;font:800 2.3rem var(--serif);text-shadow:0 2px 3px rgba(0,0,0,.35);background-size:cover;background-position:center;text-align:left;padding:0}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:var(--u);grid-auto-flow:dense;gap:8px;--u:calc((min(100vw - 28px,520px) - 48px)/4)}
+.door{position:relative;border:0;border-radius:16px;cursor:pointer;overflow:hidden;color:#fff;font:800 1.7rem var(--serif);transition:transform .2s;text-shadow:0 2px 3px rgba(0,0,0,.35);background-size:cover;background-position:center;text-align:left;padding:0}
 .door:focus-visible{outline:3px solid #1a57d6;outline-offset:2px}
-.door.w{grid-column:span 3;aspect-ratio:3/1}
+.door.w{grid-column:span 2}.door.t{grid-row:span 2}.door.b{grid-column:span 2;grid-row:span 2;font-size:2.8rem}.door.f{grid-column:span 4}.door.t{font-size:2.2rem}
 .door::before{content:"";position:absolute;inset:5px;border:1.5px dashed rgba(255,255,255,.75);border-radius:14px;pointer-events:none;z-index:2}
 .num{position:absolute;left:14px;top:8px;z-index:3;line-height:1}
 .knob{position:absolute;right:12px;bottom:12px;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#d89a2b 65%,#a3701a);box-shadow:0 1px 3px rgba(0,0,0,.5);z-index:3}
@@ -44,7 +44,8 @@ main{max-width:520px;margin:0 auto}
 .door.ready{animation:glow 1.8s ease-in-out infinite alternate}
 @keyframes glow{from{box-shadow:0 0 0 3px var(--gold),0 0 8px 2px rgba(255,196,70,.6)}to{box-shadow:0 0 0 3px #ffd56b,0 0 22px 8px rgba(255,196,70,.95)}}
 .door.open{background:#faf4e6;color:var(--red);text-shadow:none;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:8px 6px;text-align:center;font:600 .78rem/1.2 var(--body)}
-.door.open.w{flex-direction:row;justify-content:center;gap:12px}
+.door.open.w,.door.open.f{flex-direction:row;justify-content:center;gap:12px}
+.door.open .num{font:800 1.4rem/1 var(--serif)}.door.open.s{font-size:.6rem}.door.open.s .ic{font-size:1.3rem}.door.open.s small{display:none}
 .door.open::before{border-color:rgba(122,20,32,.25)}
 .door.open .num{color:var(--red)}.door.open .ic{font-size:1.7rem;margin-bottom:2px}
 .door.open.img{color:#fff;text-shadow:0 1px 3px #000}.door.open.img .num{color:#fff;text-shadow:0 2px 4px #000}
@@ -70,6 +71,22 @@ main{max-width:520px;margin:0 auto}
 .ticket{border:2px dashed var(--rb);border-radius:16px;text-align:center;padding:22px 12px;margin-bottom:12px;background:#fff}
 .ticket .big{font:800 1.5rem var(--serif);color:var(--red)}
 .note{font:italic 600 1.5rem/1.4 var(--serif);text-align:center;color:var(--green);padding:14px 0}
+.grid.intro .door{animation:drop .55s cubic-bezier(.2,1.3,.4,1) backwards;animation-delay:calc(var(--i)*45ms)}
+.grid.intro .door.ready{animation:drop .55s cubic-bezier(.2,1.3,.4,1) backwards,glow 1.8s ease-in-out infinite alternate;animation-delay:calc(var(--i)*45ms),calc(var(--i)*45ms + .6s)}
+@keyframes drop{from{opacity:0;transform:translateY(-28px) scale(.8) rotate(-5deg)}}
+.door:hover{transform:translateY(-3px) rotate(-1deg)}.door:active{transform:scale(.96)}
+.door.ready .bow{animation:wig 2.4s ease-in-out infinite}
+@keyframes wig{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-12deg)}80%{transform:rotate(9deg)}90%{transform:rotate(-4deg)}}
+.door.swing{transform-origin:left center}
+.door.ready.swing{animation:swing .55s ease-in forwards}
+@keyframes swing{to{transform:perspective(500px) rotateY(-100deg);opacity:.15}}
+.door.flip{animation:flip .7s cubic-bezier(.2,1.2,.4,1) backwards}
+@keyframes flip{from{transform:perspective(500px) rotateY(90deg);opacity:0}}
+.hero h1{animation:rise .9s .1s backwards}
+@keyframes rise{from{opacity:0;transform:translateY(14px);letter-spacing:.14em}}
+.pt{position:fixed;z-index:15;pointer-events:none;font-size:16px;animation:pt 1s ease-out forwards}
+@keyframes pt{to{transform:translate(var(--dx),calc(var(--dy) + 60px)) rotate(240deg) scale(.4);opacity:0}}
+.banner input,.banner button{font:inherit;padding:3px 8px;border-radius:8px;border:1px solid #d8b86a;background:#fff;margin:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
@@ -85,8 +102,8 @@ main{max-width:520px;margin:0 auto}
 <script>
 /* ============ 1. SETTINGS ============ */
 const C = {
-  name: "Molly",
-  from: "Keshav",
+  name: "Mia",
+  from: "Emma",
   year: 2026,
   total: 25,
   // Paste your Firebase Realtime Database URL here (no trailing slash) so both of you share progress.
@@ -140,9 +157,10 @@ const giver = q.has('giver');
 const KEY = 'advent-' + C.year;
 const ICON = {photo:'📷',video:'🎬',music:'🎵',note:'💌',voucher:'☕',poem:'📜',message:'💬',gift:'🎁'};
 const MONTH = new Date(C.year, 11, 1).toLocaleString('en-GB',{month:'short'});
-let opened = {};
+const SZ = 'ssw' + 'tsssws' + 'bssss' + 'wtssss' + 'ssbw' + 'f'; // s=1x1 w=2x1 t=1x2 b=2x2 f=full row
+let opened = {}, testDate = q.get('today') || '', intro = true, fresh = 0;
 
-const today = () => { const t = q.get('today'); const d = t ? new Date(t + 'T12:00:00') : new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
+const today = () => { const t = testDate; const d = t ? new Date(t + 'T12:00:00') : new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); };
 const doorDate = n => new Date(C.year, 11, n);
 const fmt = ts => new Date(+ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 
@@ -168,16 +186,16 @@ function render() {
   const L = $('.lights'); ['#ffd23f','#ff5b5b','#59d36b','#4aa8ff','#ff9f43'].forEach(()=>{}); 
   for (let i = 0; i < 14; i++) { const b = document.createElement('i'); b.style.background = ['#ffd23f','#ff5b5b','#59d36b','#4aa8ff','#ff9f43'][i % 5]; b.style.animationDelay = (i * .3) + 's'; L.append(b); }
   for (let i = 0; i < 18; i++) { const s = document.createElement('span'); s.className = 'snow'; s.textContent = '❄'; s.style.cssText = `left:${Math.random()*100}%;font-size:${8+Math.random()*10}px;animation-duration:${6+Math.random()*8}s;animation-delay:-${Math.random()*10}s`; $('#hero').append(s); }
-  $('#banner').innerHTML = giver ? '<div class="banner">Giver view: opening a door here will not count as opened.</div>' : '';
 
+  $('#grid').className = 'grid' + (intro ? ' intro' : ''); intro = false;
   $('#grid').innerHTML = days.map(n => {
     const x = D[n] || {t:'note',title:'',text:''}, isOpen = !!opened[n], ready = doorDate(n) <= t;
-    const w = n === C.total ? ' w' : '';
+    const w = ' ' + SZ[n - 1];
     if (isOpen) {
       const im = thumb(x);
-      return `<button class="door open${im ? ' img' : ''}${w}" data-n="${n}" style="${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${x.title}<small>${giver ? 'Opened ' + fmt(opened[n]) : ''}</small></span><i class="knob"></i></button>`;
+      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${x.title}<small>${giver ? 'Opened ' + fmt(opened[n]) : ''}</small></span><i class="knob"></i></button>`;
     }
-    return `<button class="door c${n % 5}${w}${ready ? ' ready' : ''}" data-n="${n}" aria-label="Day ${n}, ${ready ? 'ready to open' : 'locked'}"><span class="num">${n}</span><span class="bow"><b></b></span><i class="knob"></i></button>`;
+    return `<button class="door c${n % 5}${w}${ready ? ' ready' : ''}" data-n="${n}" style="--i:${n}" aria-label="Day ${n}, ${ready ? 'ready to open' : 'locked'}"><span class="num">${n}</span><span class="bow"><b></b></span><i class="knob"></i></button>`;
   }).join('');
 }
 
@@ -206,14 +224,42 @@ function toast(m) { const e = $('#toast'); e.textContent = m; e.classList.add('o
 $('#grid').addEventListener('click', async e => {
   const b = e.target.closest('.door'); if (!b) return;
   const n = +b.dataset.n;
+  if (b.classList.contains('swing')) return;
   if (b.classList.contains('open')) return show(n);
   if (doorDate(n) > today()) { b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 400); return toast(`Not yet. This door opens on ${n} ${MONTH}.`); }
+  burst(b); b.classList.add('swing');
+  await new Promise(r => setTimeout(r, 550));
   show(n);
-  if (!giver) { await save(n); render(); }
+  if (!giver) { fresh = n; await save(n); render(); setTimeout(() => fresh = 0, 900); } else render();
 });
 $('#ov').addEventListener('click', e => { if (e.target.id === 'ov' || e.target.classList.contains('x')) close(); });
 addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
 
+function burst(el) {
+  const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('span'), a = Math.random() * 6.28, d = 50 + Math.random() * 90;
+    p.className = 'pt'; p.textContent = ['✦','❄','✿','•'][i % 4];
+    p.style.cssText = `left:${x}px;top:${y}px;color:${['#ffd23f','#ff5b5b','#59d36b','#4aa8ff','#e6b34a'][i % 5]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 30}px`;
+    document.body.append(p); setTimeout(() => p.remove(), 1000);
+  }
+}
+// Test tools: shown with ?giver or ?test
+function tools() {
+  if (!giver && !q.has('test')) return;
+  const iso = d => d.toISOString().slice(0, 10);
+  $('#banner').innerHTML = `<div class="banner">${giver ? 'Giver view: opening a door here will not count as opened.' : 'Test mode: doors you open are saved.'}<br>Pretend today is <input type="date" id="td" value="${testDate || iso(new Date())}"> <button id="tr">Use real date</button>${giver ? '' : ' <button id="rs">Reset opened doors</button>'}</div>`;
+  $('#td').onchange = e => { testDate = e.target.value; render(); };
+  $('#tr').onclick = () => { testDate = ''; $('#td').value = iso(new Date()); render(); };
+  const rs = $('#rs');
+  if (rs) rs.onclick = async () => {
+    if (!confirm('Reset all opened doors' + (C.db ? ' for both of you' : '') + '?')) return;
+    opened = {}; localStorage.removeItem(KEY);
+    if (C.db) try { await fetch(C.db + '/opened.json', {method: 'DELETE'}); } catch (e) {}
+    render();
+  };
+}
+tools();
 load().then(render);
 if (C.db) setInterval(async () => { if (!$('#ov').classList.contains('on')) { await load(); render(); } }, 30000);
 </script>
