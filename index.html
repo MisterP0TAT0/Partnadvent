@@ -48,8 +48,8 @@ main{max-width:520px;margin:0 auto}
 .door.open .num{font:800 1.4rem/1 var(--serif)}.door.open.s{font-size:.6rem}.door.open.s .ic{font-size:1.3rem}.door.open.s small{display:none}
 .door.open::before{border-color:rgba(122,20,32,.25)}
 .door.open .num{color:var(--red)}.door.open .ic{font-size:1.7rem;margin-bottom:2px}
-.door.open.img{color:#fff;text-shadow:0 1px 3px #000}.door.open.img .num{color:#fff;text-shadow:0 2px 4px #000}
-.door.open.img::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(0,0,0,.6))}
+.door.open.img{color:#fff;text-shadow:0 1px 3px #000}.door.open.img .num,.door.open.img .cap{background:rgba(250,244,230,.9);color:var(--red);text-shadow:none;border-radius:8px;padding:1px 6px}
+.door.open.img::after{display:none}
 .door.open>*{position:relative;z-index:3}.door.open .num{position:absolute}
 .door.open small{display:block;font-weight:400;opacity:.8;font-size:.68rem}
 .door.shake{animation:sh .4s}
@@ -174,7 +174,7 @@ async function load() {
   if (d.error || o.error) return toast('Could not load the calendar. Check your connection.');
   opened = {}; (o.data || []).forEach(r => opened[r.day] = Date.parse(r.opened_at));
   D = {};
-  (d.data || []).forEach(r => D[r.day] = {t: ({image: 'photo', song: 'music'})[r.type] || r.type, title: r.title, text: r.message, path: r.media_path, spotify: r.spotify_url, tp: r.thumb_path || ((r.type === 'image' || r.type === 'gift') ? r.media_path : '')});
+  (d.data || []).forEach(r => D[r.day] = {t: ({image: 'photo', song: 'music'})[r.type] || r.type, title: r.title, text: r.message, path: r.media_path, spotify: r.spotify_url, tp: r.thumb_path || ((r.type === 'image' || r.type === 'gift') ? r.media_path : ''), fit: r.thumb_fit === 'cover' ? 'cover' : 'contain'});
   const pics = Object.values(D).filter(x => x.tp);
   if (pics.length) {
     const {data} = await bucket().createSignedUrls(pics.map(x => x.tp), 3600);
@@ -205,7 +205,7 @@ function render() {
     const x = D[n] || {t: 'note', title: '', text: ''}, isOpen = !!opened[n] || (giver && !!peek[n]), ready = doorDate(n) <= t, w = ' ' + SZ[n - 1];
     if (isOpen) {
       const im = x.thumb || '';
-      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background-image:url('${im}')` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span>${esc(x.title)}<small>${giver ? (opened[n] ? 'Opened ' + fmt(opened[n]) : 'Preview only') : ''}</small></span></button>`;
+      return `<button class="door open${im ? ' img' : ''}${w}${n === fresh ? ' flip' : ''}" data-n="${n}" style="--i:${n};${im ? `background:#faf4e6 url('${im}') center/${x.fit || 'contain'} no-repeat` : ''}" aria-label="Day ${n}, opened"><span class="num">${n}</span>${im ? '' : `<span class="ic">${ICON[x.t]}</span>`}<span class="cap">${esc(x.title)}<small>${giver ? (opened[n] ? 'Opened ' + fmt(opened[n]) : 'Preview only') : ''}</small></span></button>`;
     }
     return `<button class="door c${n % 5}${w}${ready ? ' ready' : ''}" data-n="${n}" style="--i:${n}" aria-label="Day ${n}, ${ready ? 'ready to open' : 'locked'}"><span class="num">${n}</span><span class="bow"><b></b></span><i class="knob"></i></button>`;
   }).join('');
