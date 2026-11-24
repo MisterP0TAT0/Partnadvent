@@ -63,7 +63,7 @@ main{max-width:520px;margin:0 auto}
 .card h2{font:italic 600 1.6rem/1.2 var(--serif);color:var(--red);margin:2px 44px 14px 0}
 .card .d{font-size:.85rem;opacity:.7}
 .card img,.card video{width:100%;border-radius:14px;margin-bottom:12px;display:block}
-.card audio{width:100%;margin:6px 0 12px}
+.card audio{width:100%;margin:6px 0 12px}.card iframe{width:100%;border:0;border-radius:12px;margin-bottom:8px;display:block}
 .card p{line-height:1.65;margin-bottom:10px;white-space:pre-wrap}
 .card .poem{font-style:italic;font-size:1.1rem;text-align:center;line-height:1.9}
 .x{position:absolute;top:10px;right:10px;z-index:5;width:44px;height:44px;border:0;border-radius:50%;background:#efe3cc;color:var(--red);font:400 1.8rem/1 var(--body);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}.x:hover{background:#e6d5b4}
@@ -211,12 +211,18 @@ function render() {
   }).join('');
 }
 
+function spot(url) {
+  const m = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]+\/)?(track|album|playlist|episode)\/([A-Za-z0-9]+)/.exec(url || '');
+  const link = `<a class="btn" href="${esc(url)}" target="_blank" rel="noopener">Open in Spotify</a>`;
+  if (!m) return /^https:\/\//.test(url || '') ? link : '';
+  return `<iframe src="https://open.spotify.com/embed/${m[1]}/${m[2]}" height="${m[1] === 'track' || m[1] === 'episode' ? 152 : 352}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Spotify player"></iframe>` + link;
+}
 function body(x) {
   const tx = x.text ? `<p>${esc(x.text)}</p>` : '', u = x.url || '';
   switch (x.t) {
     case 'photo': case 'gift': return (u ? `<img src="${u}" alt="">` : '') + tx;
     case 'video': return (u ? `<video controls playsinline preload="metadata" src="${u}"></video>` : '') + tx;
-    case 'music': return (u ? `<audio controls src="${u}"></audio>` : '') + (/^https:\/\//.test(x.spotify || '') ? `<a class="btn" href="${esc(x.spotify)}" target="_blank" rel="noopener">Listen on Spotify</a>` : '') + tx;
+    case 'music': return (u ? `<audio controls src="${u}"></audio>` : '') + spot(x.spotify) + tx;
     case 'note': return `<div class="note">${esc(x.text).replace(/\n/g, '<br>')}</div>`;
     case 'voucher': return `<div class="ticket"><div class="big">☕ Voucher</div><p style="margin:6px 0 0">Redeem in person, any time.</p></div>` + tx;
     case 'poem': return `<p class="poem">${esc(x.text)}</p>`;
