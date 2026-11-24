@@ -174,11 +174,11 @@ async function load() {
   if (d.error || o.error) return toast('Could not load the calendar. Check your connection.');
   opened = {}; (o.data || []).forEach(r => opened[r.day] = Date.parse(r.opened_at));
   D = {};
-  (d.data || []).forEach(r => D[r.day] = {t: ({image: 'photo', song: 'music'})[r.type] || r.type, title: r.title, text: r.message, path: r.media_path, spotify: r.spotify_url});
-  const pics = Object.values(D).filter(x => x.path && (x.t === 'photo' || x.t === 'gift'));
+  (d.data || []).forEach(r => D[r.day] = {t: ({image: 'photo', song: 'music'})[r.type] || r.type, title: r.title, text: r.message, path: r.media_path, spotify: r.spotify_url, tp: r.thumb_path || ((r.type === 'image' || r.type === 'gift') ? r.media_path : '')});
+  const pics = Object.values(D).filter(x => x.tp);
   if (pics.length) {
-    const {data} = await bucket().createSignedUrls(pics.map(x => x.path), 3600);
-    (data || []).forEach(u => pics.forEach(x => { if (x.path === u.path && u.signedUrl) x.thumb = u.signedUrl; }));
+    const {data} = await bucket().createSignedUrls(pics.map(x => x.tp), 3600);
+    (data || []).forEach(u => pics.forEach(x => { if (x.tp === u.path && u.signedUrl) x.thumb = u.signedUrl; }));
   }
 }
 async function save(n) {
