@@ -65,6 +65,7 @@ main{max-width:520px;margin:0 auto}
 .card img,.card video{width:100%;border-radius:14px;margin-bottom:12px;display:block}
 .card audio{width:100%;margin:6px 0 12px}.card iframe{width:100%;border:0;border-radius:12px;margin-bottom:8px;display:block}
 .car{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px;margin-bottom:8px;scrollbar-width:none}.car::-webkit-scrollbar{display:none}
+.card .car video{flex:0 0 100%;width:100%;margin:0;scroll-snap-align:center;max-height:60vh;background:#000}
 .card .car img{flex:0 0 100%;width:100%;margin:0;scroll-snap-align:center;object-fit:contain;max-height:60vh;background:#f0e6d0}
 .dots{display:flex;justify-content:center;gap:8px;margin-bottom:12px}.dots i{width:10px;height:10px;border-radius:50%;background:#d8c9a6;cursor:pointer;transition:.2s}.dots i.on{background:var(--red);transform:scale(1.2)}
 .card p{line-height:1.65;margin-bottom:10px;white-space:pre-wrap}
@@ -221,21 +222,21 @@ function spot(url) {
   return `<iframe src="https://open.spotify.com/embed/${m[1]}/${m[2]}" height="${m[1] === 'track' || m[1] === 'episode' ? 152 : 352}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Spotify player"></iframe>` + link;
 }
 function pics(x) {
-  const us = x.urls || [];
-  if (us.length < 2) return us[0] ? `<img src="${us[0]}" alt="">` : '';
-  return `<div class="car">${us.map(s => `<img src="${s}" alt="">`).join('')}</div><div class="dots">${us.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>`;
+  const it = x.items || [], el = i => i.v ? `<video controls playsinline preload="metadata" src="${i.u}"></video>` : `<img src="${i.u}" alt="">`;
+  if (it.length < 2) return it[0] ? el(it[0]) : '';
+  return `<div class="car">${it.map(el).join('')}</div><div class="dots">${it.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>`;
 }
 function bindCar() {
   const c = $('.car'); if (!c) return;
   const ds = [...document.querySelectorAll('.dots i')];
-  c.onscroll = () => { const i = Math.round(c.scrollLeft / (c.clientWidth + 8)); ds.forEach((d, k) => d.classList.toggle('on', k === i)); };
+  c.onscroll = () => { const i = Math.round(c.scrollLeft / (c.clientWidth + 8)); [...c.children].forEach((e, k) => { if (k !== i && e.pause) e.pause(); }); ds.forEach((d, k) => d.classList.toggle('on', k === i)); };
   ds.forEach((d, i) => d.onclick = () => c.scrollTo({left: i * (c.clientWidth + 8), behavior: 'smooth'}));
 }
 function body(x) {
   const tx = x.text ? `<p>${esc(x.text)}</p>` : '', u = x.url || '';
   switch (x.t) {
-    case 'photo': case 'gift': return pics(x) + tx;
-    case 'video': return (u ? `<video controls playsinline preload="metadata" src="${u}"></video>` : '') + tx;
+    case 'photo': case 'gift': case 'video': return pics(x) + tx;
+    
     case 'music': return (u ? `<audio controls src="${u}"></audio>` : '') + spot(x.spotify) + tx;
     case 'note': return `<div class="note">${esc(x.text).replace(/\n/g, '<br>')}</div>`;
     case 'voucher': return `<div class="ticket"><div class="big">☕ Voucher</div><p style="margin:6px 0 0">Redeem in person, any time.</p></div>` + tx;
@@ -246,8 +247,8 @@ function body(x) {
 }
 async function show(n) {
   const x = D[n]; if (!x) return;
-  const ps = [x.path, ...(x.extra || [])].filter(Boolean); x.urls = [];
-  if (ps.length) { const {data} = await bucket().createSignedUrls(ps, 3600); x.urls = ps.map(p => ((data || []).find(u => u.path === p) || {}).signedUrl).filter(Boolean); x.url = x.urls[0]; }
+  const ps = [x.path, ...(x.extra || [])].filter(Boolean); x.items = [];
+  if (ps.length) { const {data} = await bucket().createSignedUrls(ps, 3600); x.items = ps.map(p => ({u: ((data || []).find(f => f.path === p) || {}).signedUrl, v: /\.(mp4|m4v|mov|webm)$/i.test(p)})).filter(i => i.u); x.url = x.items[0] && x.items[0].u; }
   $('#card').innerHTML = `<button class="x" aria-label="Close">×</button><div class="d">${n} ${MONTH}</div><h2>${esc(x.title)}</h2>${body(x)}`; bindCar();
   $('#ov').classList.add('on'); $('#card .x').focus();
 }
